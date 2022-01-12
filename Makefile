@@ -3,7 +3,8 @@ SHELL:=/usr/bin/env bash
 .PHONY: lint
 lint:
 	poetry run mypy trainmaster tests/**/*.py
-	poetry run flake8 .
+	poetry run black .
+	poetry run flake8 --ignore=E501 trainmaster/**/*.py
 	poetry run doc8 -q docs
 
 .PHONY: unit

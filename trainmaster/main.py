@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Union
-import simpy, simpy.rt, random
+import simpy
+import simpy.rt
+import random
 from random import randint
 
 

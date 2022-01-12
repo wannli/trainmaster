@@ -8,6 +8,7 @@ authors = ["Wannes Lint <contact@wanneslint.net>"]
 python = "^3.7"
 simpy = "^4.0.1"
 typed-ast = "^1.5.1"
+black = "^21.12b0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
