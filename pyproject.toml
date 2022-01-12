@@ -5,7 +5,7 @@ description = ""
 authors = ["Wannes Lint <contact@wanneslint.net>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 simpy = "^4.0.1"
 
 [tool.poetry.dev-dependencies]
