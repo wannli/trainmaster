@@ -17,7 +17,7 @@ def match():
                 station.hold.append(train)
 
 
-def find_station(x: int, y: int) -> "Station":
+def find_station(x: int, y: int) -> "Station" | None:
     return next(
         (station for station in Stations if station.x == x and station.y == y), None
     )
