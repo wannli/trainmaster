@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Union
 import simpy, simpy.rt, random
 from random import randint
 
@@ -17,7 +17,7 @@ def match():
                 station.hold.append(train)
 
 
-def find_station(x: int, y: int) -> "Station" | None:
+def find_station(x: int, y: int) -> Union("Station", None):
     return next(
         (station for station in Stations if station.x == x and station.y == y), None
     )
