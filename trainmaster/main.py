@@ -24,11 +24,9 @@ def find_station(x: int, y: int) -> Union["Station", None]:
         (station for station in Stations if station.x == x and station.y == y), None
     )
 
-    # def register(self, registered):
-    # if isinstance(registered, Station):
-    # self.Stations.append(registered)
-    # elif isinstance(registered, Train):
-    # self.Trains.append(registered)
+def msg(now, train: "Train", message: str):
+    if train.log:
+        print(f"{now:03d} {train.id} | {message}")
 
 
 Trains = []
@@ -40,10 +38,12 @@ class Train:
     x: int
     y: int
     id: str
+    log: bool = False
 
     def __post_init__(self):
         Trains.append(self)
 
+    def __repr__(self):
     def reserve(self, station: "Station"):
         station.hold.append(self)
         # print(f'{env.now:03d} {self.id} | +Hold {station.id}')
@@ -53,6 +53,7 @@ class Train:
         # print(f'{env.now:03d} {self.id} | -Hold {station.id}')
 
     def move(self, env, i, j):
+        msg(env.now, self, f"MOVE {self.x},{self.y} to {i},{j}")
         self._x = self.x
         self._y = self.y
         # print(self._x, self._y)
@@ -62,6 +63,8 @@ class Train:
             # print('b,permit')
             if a:
                 self.exit(a)
+            msg(env.now, self, b.id)
+            msg(env.now, self, b.no_go)
             self.reserve(b)
             print(f"{env.now:03d} {self.id} | D ({self._x},{self._y})->({i},{j})")
             self.x, self.y = 0, 0
@@ -71,7 +74,9 @@ class Train:
             self.x, self.y = i, j
             # print('debug',self.x,self._x,self.y,self._y)
         elif isinstance(b, Station) and not b.permit_entry() and self not in b.no_go:
-            print(f"{env.now:03d} {self.id} | No-go to {b.id}")
+            if self.log:
+                print(f"{env.now:03d} {self.id} | No-go to {b}")
+            msg(env.now, self, f"{self.x},{self.y}")
             b.no_go.append(self)
         else:
             if a:
@@ -97,6 +102,7 @@ class Station:
     def __post_init__(self):
         Stations.append(self)
 
+        return f"{self.id}({self.x},{self.y})(R{self.reserved}, H{self.hold}, N{self.no_go})"
     def permit_entry(self) -> bool:
         if len(self.hold) < self.depth:
             return True
@@ -114,20 +120,25 @@ def stationmaster(env, station: Station):
     while True:
         yield env.timeout(5)
         _trains = list(trains_at_location(station.x, station.y))
-        if station.depth == len(_trains):
-            print(f"{env.now:03d} ==== | {station.id} at capacity")
-            # print(station.hold)
-            # print(Trains)
+        if station.depth == len(_trains):  # station is full
+            print(f"{env.now:03d} {station.id[0:4]} | At capacity ({station.depth})")
             for train in _trains:
                 if random.choice([True, False]):
                     env.process(train.move(env, randint(1, 50), randint(1, 50)))
-                else:
-                    env.process(train.move(env, 20, 20))
+            print(f"{env.now:03d} {station.id[0:4]} | Capacity ({len(_trains)})")
                 if (
                     len(station.no_go) > 0
                 ):  # TODO: now picks up trains that are underway
                     # print(env.now,'pop',station.id,station.no_go)
                     popped_train = station.no_go.pop(0)
+                        msg(
+                            env.now,
+                            popped_train,
+                            "popped "
+                            + str(popped_train)
+                            + " from no-go "
+                            + str(station),
+                        )
                     env.process(popped_train.move(env, station.x, station.y))
 
             # for train in station.no_go[:station.depth]:
