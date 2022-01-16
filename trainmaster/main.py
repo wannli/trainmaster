@@ -50,8 +50,8 @@ def msg(now, train: "Train", type: str, message: str):
         log.debug(f"{now:03d} {train.id[0:4]} | {message}")
 
 
-Trains = []
-Stations = []
+TRAINS = []
+STATIONS = []
 
 
 @dataclass
@@ -62,24 +62,24 @@ class Train:
     log: bool = False
 
     def __post_init__(self):
-        Trains.append(self)
+        TRAINS.append(self)
 
     def __repr__(self):
         return f"{self.id}({self.x},{self.y})"
 
-    def reserve(self, station: "Station"):
+    def reserve(self, station: "Station") -> None:
         station.reserved.append(self)
         # print(f'{env.now:03d} {self.id} | +Hold {station.id}')
 
-    def enter(self, station: "Station"):
+    def enter(self, station: "Station") -> None:
         station.reserved.remove(self)
         station.hold.append(self)
 
-    def exit(self, station: "Station"):
+    def exit(self, station: "Station") -> None:
         station.hold.remove(self)
         # print(f'{env.now:03d} {self.id} | -Hold {station.id}')
 
-    def move(self, env, i, j):
+    def move(self, env, i, j) -> None:
         msg(env.now, self, "debug", f"Command: move {self.x},{self.y} to {i},{j}")
         if self.x == 0 and self.y == 0:
             return "Hello"
@@ -127,7 +127,7 @@ class Station:
     no_go: List[Train] = field(default_factory=list)
 
     def __post_init__(self):
-        Stations.append(self)
+        STATIONS.append(self)
 
     def __repr__(self):
         return f"{self.id}({self.x},{self.y})"
@@ -139,8 +139,8 @@ class Station:
             return False
 
 
-def trains_at_location(x: int, y: int):
-    for t in Trains:
+def trains_at_location(x: int, y: int) -> List["Train"]:
+    for t in TRAINS:
         if t.x == x and t.y == y:
             yield t
 
@@ -150,10 +150,14 @@ def stationmaster(env, station: Station):
     Stationmaster that dispatches trains to random locations when the station is full.
     """
     while True:
-        yield env.timeout(5)
+        yield env.timeout(1)
         _trains = list(trains_at_location(station.x, station.y))
         if station.depth == len(_trains):  # station is full
-            logt(env.now, station.id, f"At capacity ({station.depth})")
+            logt(
+                env.now,
+                station.id,
+                f"Stationmaster's whistle ({len(_trains)}/{station.depth})",
+            )
             for train in _trains:
                 # if random.choice([True, False]):
                 # msg(env.now, train,"info",  "Opt 1")
@@ -182,7 +186,10 @@ def stationmaster(env, station: Station):
                         env.process(popped_train.move(env, station.x, station.y))
 
 
-def trafficmaster(env):
+def schedulemaster(env):
+    """
+    Schedulemaster that schedules trains.
+    """
     while True:
         yield env.timeout(1)
 
@@ -192,10 +199,10 @@ def grid() -> str:
     for _ in range(50):
         for __ in range(50):
             coo = "__"
-            for train in Trains:
+            for train in TRAINS:
                 if train.x == __ and train.y == _:
                     coo = "Tr"
-            for station in Stations:
+            for station in STATIONS:
                 if station.x == __ and station.y == _:
                     if coo == "Tr":
                         coo = "Xx"
@@ -222,13 +229,12 @@ if __name__ == "__main__":
         env.process(train.move(env, 7, 5))
     for train in t:
         env.process(train.move(env, 20, 20))
-    for station in Stations:
+    for station in STATIONS:
         env.process(stationmaster(env, station))
-    env.process(trafficmaster(env))
-    env.run(until=120)
-    logt(env.now, "====", f"Trains: {Trains}")
-    logt(env.now, "====", f"Stations: {Stations}")
-    print(grid())
+    env.process(schedulemaster(env))
+    env.run(until=180)
+    logt(env.now, "====", f"Trains: {TRAINS}")
+    logt(env.now, "====", f"Stations: {STATIONS}")
 
 
 # def test_permit_entry_no():
