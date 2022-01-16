@@ -16,6 +16,9 @@ logging.basicConfig(
 
 log = logging.getLogger("rich")
 
+TRAINS = []
+STATIONS = []
+
 
 @dataclass
 class Universe:
@@ -48,10 +51,6 @@ def msg(now, train: "Train", type: str, message: str):
         log.info(f"{now:03d} {train.id[0:4]} | {message}")
     elif train.log and type == "debug":
         log.debug(f"{now:03d} {train.id[0:4]} | {message}")
-
-
-TRAINS = []
-STATIONS = []
 
 
 @dataclass
