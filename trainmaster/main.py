@@ -47,8 +47,12 @@ class Train:
         return f"{self.id}({self.x},{self.y})"
 
     def reserve(self, station: "Station"):
-        station.hold.append(self)
+        station.reserved.append(self)
         # print(f'{env.now:03d} {self.id} | +Hold {station.id}')
+
+    def enter(self, station: "Station"):
+        station.reserved.remove(self)
+        station.hold.append(self)
 
     def exit(self, station: "Station"):
         station.hold.remove(self)
@@ -74,6 +78,7 @@ class Train:
             yield env.timeout(abs(j - self._y))
             print(f"{env.now:03d} {self.id} | A ({i},{j})<-({self._x},{self._y})")
             self.x, self.y = i, j
+            self.enter(b)
             # print('debug',self.x,self._x,self.y,self._y)
         elif isinstance(b, Station) and not b.permit_entry() and self not in b.no_go:
             if self.log:
@@ -98,6 +103,7 @@ class Station:
     id: str
     depth: int = 1
     # occupied: bool = False
+    reserved: List["Train"] = field(default_factory=list)
     hold: List[Train] = field(default_factory=list)
     no_go: List[Train] = field(default_factory=list)
 
@@ -107,7 +113,7 @@ class Station:
     def __repr__(self):
         return f"{self.id}({self.x},{self.y})(R{self.reserved}, H{self.hold}, N{self.no_go})"
     def permit_entry(self) -> bool:
-        if len(self.hold) < self.depth:
+        if len(self.hold) + len(self.reserved) < self.depth:
             return True
         else:
             return False
