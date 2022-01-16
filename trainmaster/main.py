@@ -16,14 +16,8 @@ logging.basicConfig(
 
 log = logging.getLogger("rich")
 
-TRAINS = []
-STATIONS = []
-
-
-@dataclass
-class Universe:
-    Stations: List["Station"] = field(default_factory=list)
-    Trains: List["Train"] = field(default_factory=list)
+TRAINS: List["Train"] = []
+STATIONS: List["Station"] = []
 
 
 def match():
@@ -78,7 +72,7 @@ class Train:
         station.hold.remove(self)
         # print(f'{env.now:03d} {self.id} | -Hold {station.id}')
 
-    def move(self, env, i, j) -> None:
+    def move(self, env, i, j):
         msg(env.now, self, "debug", f"Command: move {self.x},{self.y} to {i},{j}")
         if self.x == 0 and self.y == 0:
             return "Hello"
@@ -142,7 +136,7 @@ class Station:
             return False
 
 
-def trains_at_location(x: int, y: int) -> List["Train"]:
+def trains_at_location(x: int, y: int):
     for t in TRAINS:
         if t.x == x and t.y == y:
             yield t
