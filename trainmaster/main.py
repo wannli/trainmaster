@@ -44,6 +44,8 @@ class Train:
         Trains.append(self)
 
     def __repr__(self):
+        return f"{self.id}({self.x},{self.y})"
+
     def reserve(self, station: "Station"):
         station.hold.append(self)
         # print(f'{env.now:03d} {self.id} | +Hold {station.id}')
@@ -102,6 +104,7 @@ class Station:
     def __post_init__(self):
         Stations.append(self)
 
+    def __repr__(self):
         return f"{self.id}({self.x},{self.y})(R{self.reserved}, H{self.hold}, N{self.no_go})"
     def permit_entry(self) -> bool:
         if len(self.hold) < self.depth:
