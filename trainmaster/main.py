@@ -157,10 +157,7 @@ def stationmaster(env, station: Station):
             empty_slots = station.depth - len(_trains)
             if empty_slots > 0:
                 for _ in range(empty_slots):
-                    if (
-                        len(station.no_go) > 0
-                    ):  # TODO: now picks up trains that are underway
-                        # print(env.now,'pop',station.id,station.no_go)
+                    if len(station.no_go) > 0:
                         popped_train = station.no_go.pop(0)
                         msg(
                             env.now,
