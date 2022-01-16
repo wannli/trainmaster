@@ -3,7 +3,18 @@ from typing import List, Union
 import simpy
 import simpy.rt
 import random
+import logging
+from rich.logging import RichHandler
 from random import randint
+
+logging.basicConfig(
+    level="INFO",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)],
+)
+
+log = logging.getLogger("rich")
 
 
 @dataclass
@@ -25,9 +36,18 @@ def find_station(x: int, y: int) -> Union["Station", None]:
     )
 
 
-def msg(now, train: "Train", message: str):
-    if train.log:
-        print(f"{now:03d} {train.id} | {message}")
+def logt(now, object: str, message: str, type: str = "info"):
+    if type == "debug":
+        log.debug(f"{now:03d} {object[0:4]} | {message}")
+    else:
+        log.info(f"{now:03d} {object[0:4]} | {message}")
+
+
+def msg(now, train: "Train", type: str, message: str):
+    if train.log and type == "info":
+        log.info(f"{now:03d} {train.id[0:4]} | {message}")
+    elif train.log and type == "debug":
+        log.debug(f"{now:03d} {train.id[0:4]} | {message}")
 
 
 Trains = []
@@ -60,7 +80,7 @@ class Train:
         # print(f'{env.now:03d} {self.id} | -Hold {station.id}')
 
     def move(self, env, i, j):
-        msg(env.now, self, f"MOVE {self.x},{self.y} to {i},{j}")
+        msg(env.now, self, "debug", f"Command: move {self.x},{self.y} to {i},{j}")
         if self.x == 0 and self.y == 0:
             return "Hello"
         self._x = self.x
@@ -72,30 +92,26 @@ class Train:
             # print('b,permit')
             if a:
                 self.exit(a)
-            msg(env.now, self, b.id)
-            msg(env.now, self, b.no_go)
             self.reserve(b)
-            print(f"{env.now:03d} {self.id} | D ({self._x},{self._y})->({i},{j})")
+            logt(env.now, self.id, f"D ({self._x},{self._y})->({i},{j})")
             self.x, self.y = 0, 0
             yield env.timeout(abs(i - self._x))
             yield env.timeout(abs(j - self._y))
-            print(f"{env.now:03d} {self.id} | A ({i},{j})<-({self._x},{self._y})")
+            logt(env.now, self.id, f"A ({i},{j})<-({self._x},{self._y})")
             self.x, self.y = i, j
             self.enter(b)
             # print('debug',self.x,self._x,self.y,self._y)
         elif isinstance(b, Station) and not b.permit_entry() and self not in b.no_go:
-            if self.log:
-                print(f"{env.now:03d} {self.id} | No-go to {b}")
-            msg(env.now, self, f"{self.x},{self.y}")
+            msg(env.now, self, "info", f"No-go to {b}")
             b.no_go.append(self)
         else:
             if a:
                 self.exit(a)
-            print(f"{env.now:03d} {self.id} | D ({self._x},{self._y})->({i},{j})")
+            logt(env.now, self.id, f"D ({self._x},{self._y})->({i},{j})")
             self.x, self.y = 0, 0
             yield env.timeout(abs(i - self.x))
             yield env.timeout(abs(j - self.y))
-            print(f"{env.now:03d} {self.id} | A ({i},{j})<-({self._x},{self._y})")
+            logt(env.now, self.id, f"A ({i},{j})<-({self._x},{self._y})")
             self.x, self.y = i, j
 
 
@@ -114,7 +130,7 @@ class Station:
         Stations.append(self)
 
     def __repr__(self):
-        return f"{self.id}({self.x},{self.y})(R{self.reserved}, H{self.hold}, N{self.no_go})"
+        return f"{self.id}({self.x},{self.y})"
 
     def permit_entry(self) -> bool:
         if len(self.hold) + len(self.reserved) < self.depth:
@@ -134,26 +150,21 @@ def stationmaster(env, station: Station):
     Stationmaster that dispatches trains to random locations when the station is full.
     """
     while True:
-        for _ in range(5):
-            yield env.timeout(1)
-            if len(list(trains_at_location(station.x, station.y))) > 0:
-                print(
-                    f"{env.now:03d} {station.id[0:4]} | {list(trains_at_location(station.x, station.y))}"
-                )
+        yield env.timeout(5)
         _trains = list(trains_at_location(station.x, station.y))
         if station.depth == len(_trains):  # station is full
-            print(f"{env.now:03d} {station.id[0:4]} | At capacity ({station.depth})")
+            logt(env.now, station.id, f"At capacity ({station.depth})")
             for train in _trains:
                 # if random.choice([True, False]):
-                # msg(env.now, train, "Opt 1")
+                # msg(env.now, train,"info",  "Opt 1")
                 # env.process(train.move(env, 20, 20))
                 # else:
-                # msg(env.now, train, "Opt 2")
+                # msg(env.now, train,"info",  "Opt 2")
                 env.process(train.move(env, randint(1, 50), randint(1, 50)))
 
             yield env.timeout(1)
             _trains = list(trains_at_location(station.x, station.y))
-            print(f"{env.now:03d} {station.id[0:4]} | Capacity ({len(_trains)})")
+            logt(env.now, station.id, f"Capacity ({len(_trains)})", "debug")
             empty_slots = station.depth - len(_trains)
             if empty_slots > 0:
                 for _ in range(empty_slots):
@@ -162,6 +173,7 @@ def stationmaster(env, station: Station):
                         msg(
                             env.now,
                             popped_train,
+                            "debug",
                             "popped "
                             + str(popped_train)
                             + " from no-go "
@@ -169,37 +181,13 @@ def stationmaster(env, station: Station):
                         )
                         env.process(popped_train.move(env, station.x, station.y))
 
-        # for train in station.no_go[:station.depth]:
-        # station.no_go.remove(train)
-        # env.process(train.move(env,station.x,station.y))
-
 
 def trafficmaster(env):
     while True:
         yield env.timeout(1)
 
 
-if __name__ == "__main__":
-    print("=== ==== | =========================")
-    env = simpy.Environment()
-    random.seed(421)
-    t = [Train(x=33, y=33, id="Ic01")] + [
-        Train(x=randint(1, 20), y=randint(1, 20), id=f"Spr{_}") for _ in range(9)
-    ]
-    den_helder = Station(1, 33, id="Den Helder", depth=1)
-    breda = Station(7, 5, id="Breda", depth=randint(2, 4))
-    arnhem = Station(20, 20, id="Arnhem", depth=2)
-    match()
-    for train in t:
-        env.process(train.move(env, 7, 5))
-    for train in t:
-        env.process(train.move(env, 20, 20))
-    for station in Stations:
-        env.process(stationmaster(env, station))
-    env.process(trafficmaster(env))
-    env.run(until=120)
-    print(f"FIN ==== | Trains: {Trains}")
-    print(f"FIN ==== | Stations: {Stations}")
+def grid() -> str:
     conclusion = ""
     for _ in range(50):
         for __ in range(50):
@@ -215,7 +203,33 @@ if __name__ == "__main__":
                         coo = "S"
             conclusion += coo
         conclusion += "\n"
-    print(conclusion)
+    return conclusion
+
+
+if __name__ == "__main__":
+    print("=== ==== | =========================")
+    env = simpy.Environment()
+    random.seed(421)
+    t = [Train(x=33, y=33, id="Ic01")] + [
+        Train(x=randint(1, 20), y=randint(1, 20), id=f"Spr{_}", log=True)
+        for _ in range(9)
+    ]
+    den_helder = Station(1, 33, id="Den Helder", depth=1)
+    breda = Station(7, 5, id="Breda", depth=randint(2, 4))
+    arnhem = Station(20, 20, id="Arnhem", depth=2)
+    match()
+    for train in t:
+        env.process(train.move(env, 7, 5))
+    for train in t:
+        env.process(train.move(env, 20, 20))
+    for station in Stations:
+        env.process(stationmaster(env, station))
+    env.process(trafficmaster(env))
+    env.run(until=120)
+    logt(env.now, "====", f"Trains: {Trains}")
+    logt(env.now, "====", f"Stations: {Stations}")
+    print(grid())
+
 
 # def test_permit_entry_no():
 #     too_small = Station(1, 1, id="Breda")
