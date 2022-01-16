@@ -24,6 +24,7 @@ def find_station(x: int, y: int) -> Union["Station", None]:
         (station for station in Stations if station.x == x and station.y == y), None
     )
 
+
 def msg(now, train: "Train", message: str):
     if train.log:
         print(f"{now:03d} {train.id} | {message}")
@@ -112,6 +113,7 @@ class Station:
 
     def __repr__(self):
         return f"{self.id}({self.x},{self.y})(R{self.reserved}, H{self.hold}, N{self.no_go})"
+
     def permit_entry(self) -> bool:
         if len(self.hold) + len(self.reserved) < self.depth:
             return True
@@ -145,7 +147,7 @@ def stationmaster(env, station: Station):
                 # env.process(train.move(env, 20, 20))
                 # else:
                 # msg(env.now, train, "Opt 2")
-                    env.process(train.move(env, randint(1, 50), randint(1, 50)))
+                env.process(train.move(env, randint(1, 50), randint(1, 50)))
 
             yield env.timeout(1)
             _trains = list(trains_at_location(station.x, station.y))
@@ -153,11 +155,11 @@ def stationmaster(env, station: Station):
             empty_slots = station.depth - len(_trains)
             if empty_slots > 0:
                 for _ in range(empty_slots):
-                if (
-                    len(station.no_go) > 0
-                ):  # TODO: now picks up trains that are underway
-                    # print(env.now,'pop',station.id,station.no_go)
-                    popped_train = station.no_go.pop(0)
+                    if (
+                        len(station.no_go) > 0
+                    ):  # TODO: now picks up trains that are underway
+                        # print(env.now,'pop',station.id,station.no_go)
+                        popped_train = station.no_go.pop(0)
                         msg(
                             env.now,
                             popped_train,
@@ -166,16 +168,18 @@ def stationmaster(env, station: Station):
                             + " from no-go "
                             + str(station),
                         )
-                    env.process(popped_train.move(env, station.x, station.y))
+                        env.process(popped_train.move(env, station.x, station.y))
 
-            # for train in station.no_go[:station.depth]:
-            # station.no_go.remove(train)
-            # env.process(train.move(env,station.x,station.y))
+        # for train in station.no_go[:station.depth]:
+        # station.no_go.remove(train)
+        # env.process(train.move(env,station.x,station.y))
 
 
 def trafficmaster(env):
     while True:
         yield env.timeout(1)
+
+
 if __name__ == "__main__":
     print("=== ==== | =========================")
     env = simpy.Environment()
@@ -184,11 +188,17 @@ if __name__ == "__main__":
         Train(x=randint(1, 20), y=randint(1, 20), id=f"Spr{_}") for _ in range(9)
     ]
     den_helder = Station(1, 33, id="Den Helder", depth=1)
-    too_small = Station(7, 5, id="Breda", depth=randint(2, 4))
+    breda = Station(7, 5, id="Breda", depth=randint(2, 4))
     arnhem = Station(20, 20, id="Arnhem", depth=2)
+    match()
     for train in t:
         env.process(train.move(env, 7, 5))
+    for train in t:
+        env.process(train.move(env, 20, 20))
+    for station in Stations:
+        env.process(stationmaster(env, station))
     env.process(trafficmaster(env))
+    env.run(until=120)
     print(f"FIN ==== | Trains: {Trains}")
     print(f"FIN ==== | Stations: {Stations}")
     conclusion = ""
