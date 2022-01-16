@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+
 from trainmaster.main import *
 
 # from trainmaster import Station, Train
