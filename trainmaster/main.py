@@ -24,15 +24,15 @@ class Universe:
 
 
 def match():
-    for station in Stations:
-        for train in Trains:
+    for station in STATIONS:
+        for train in TRAINS:
             if station.x == train.x and station.y == train.y:
                 station.hold.append(train)
 
 
 def find_station(x: int, y: int) -> Union["Station", None]:
     return next(
-        (station for station in Stations if station.x == x and station.y == y), None
+        (station for station in STATIONS if station.x == x and station.y == y), None
     )
 
 
