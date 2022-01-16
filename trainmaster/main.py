@@ -61,6 +61,8 @@ class Train:
 
     def move(self, env, i, j):
         msg(env.now, self, f"MOVE {self.x},{self.y} to {i},{j}")
+        if self.x == 0 and self.y == 0:
+            return "Hello"
         self._x = self.x
         self._y = self.y
         # print(self._x, self._y)
