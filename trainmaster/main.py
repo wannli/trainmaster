@@ -153,17 +153,17 @@ if __name__ == "__main__":
     env.run(until=300)
 
 
-def test_permit_entry_no():
-    too_small = Station(1, 1, id="Breda")
-    train = Train(x=10, y=5, id="SprinterTest")
-    assert too_small.permit_entry() == True
-    train.reserve(too_small)
-    assert too_small.permit_entry() == False
+# def test_permit_entry_no():
+#     too_small = Station(1, 1, id="Breda")
+#     train = Train(x=10, y=5, id="SprinterTest")
+#     assert too_small.permit_entry() == True
+#     train.reserve(too_small)
+#     assert too_small.permit_entry() == False
 
 
-def test_permit_entry_yes():
-    right_size = Station(2, 2, depth=2, id="Breda")
-    train = Train(x=10, y=5, id="SprinterTest")
-    assert right_size.permit_entry() == True
-    train.reserve(right_size)
-    assert right_size.permit_entry() == True
+# def test_permit_entry_yes():
+#     right_size = Station(2, 2, depth=2, id="Breda")
+#     train = Train(x=10, y=5, id="SprinterTest")
+#     assert right_size.permit_entry() == True
+#     train.reserve(right_size)
+#     assert right_size.permit_entry() == True
