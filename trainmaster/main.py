@@ -165,6 +165,24 @@ if __name__ == "__main__":
     for train in t:
         env.process(train.move(env, 7, 5))
     env.process(trafficmaster(env))
+    print(f"FIN ==== | Trains: {Trains}")
+    print(f"FIN ==== | Stations: {Stations}")
+    conclusion = ""
+    for _ in range(50):
+        for __ in range(50):
+            coo = "__"
+            for train in Trains:
+                if train.x == __ and train.y == _:
+                    coo = "Tr"
+            for station in Stations:
+                if station.x == __ and station.y == _:
+                    if coo == "Tr":
+                        coo = "Xx"
+                    else:
+                        coo = "S"
+            conclusion += coo
+        conclusion += "\n"
+    print(conclusion)
 
 # def test_permit_entry_no():
 #     too_small = Station(1, 1, id="Breda")
