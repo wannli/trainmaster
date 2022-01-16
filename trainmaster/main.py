@@ -86,27 +86,31 @@ class Train:
         self._x = self.x
         self._y = self.y
         # print(self._x, self._y)
-        a = find_station(x=self._x, y=self._y)
-        b = find_station(x=i, y=j)
-        if isinstance(b, Station) and b.permit_entry():
+        station_from = find_station(x=self._x, y=self._y)
+        station_to = find_station(x=i, y=j)
+        if isinstance(station_to, Station) and station_to.permit_entry():
             # print('b,permit')
-            if a:
-                self.exit(a)
-            self.reserve(b)
+            if station_from:
+                self.exit(station_from)
+            self.reserve(station_to)
             logt(env.now, self.id, f"D ({self._x},{self._y})->({i},{j})")
             self.x, self.y = 0, 0
             yield env.timeout(abs(i - self._x))
             yield env.timeout(abs(j - self._y))
             logt(env.now, self.id, f"A ({i},{j})<-({self._x},{self._y})")
             self.x, self.y = i, j
-            self.enter(b)
+            self.enter(station_to)
             # print('debug',self.x,self._x,self.y,self._y)
-        elif isinstance(b, Station) and not b.permit_entry() and self not in b.no_go:
-            msg(env.now, self, "info", f"No-go to {b}")
-            b.no_go.append(self)
+        elif (
+            isinstance(station_to, Station)
+            and not station_to.permit_entry()
+            and self not in station_to.no_go
+        ):
+            msg(env.now, self, "info", f"No-go to {station_to}")
+            station_to.no_go.append(self)
         else:
-            if a:
-                self.exit(a)
+            if station_from:
+                self.exit(station_from)
             logt(env.now, self.id, f"D ({self._x},{self._y})->({i},{j})")
             self.x, self.y = 0, 0
             yield env.timeout(abs(i - self.x))
