@@ -149,6 +149,9 @@ def stationmaster(env, station: Station):
             # env.process(train.move(env,station.x,station.y))
 
 
+def trafficmaster(env):
+    while True:
+        yield env.timeout(1)
 if __name__ == "__main__":
     print("=== ==== | =========================")
     env = simpy.Environment()
@@ -161,11 +164,7 @@ if __name__ == "__main__":
     arnhem = Station(20, 20, id="Arnhem", depth=2)
     for train in t:
         env.process(train.move(env, 7, 5))
-    match()
-    env.process(stationmaster(env, too_small))
-    env.process(stationmaster(env, arnhem))
-    env.run(until=300)
-
+    env.process(trafficmaster(env))
 
 # def test_permit_entry_no():
 #     too_small = Station(1, 1, id="Breda")
