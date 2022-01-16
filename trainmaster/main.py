@@ -120,15 +120,33 @@ def trains_at_location(x: int, y: int):
 
 
 def stationmaster(env, station: Station):
+    """
+    Stationmaster that dispatches trains to random locations when the station is full.
+    """
     while True:
-        yield env.timeout(5)
+        for _ in range(5):
+            yield env.timeout(1)
+            if len(list(trains_at_location(station.x, station.y))) > 0:
+                print(
+                    f"{env.now:03d} {station.id[0:4]} | {list(trains_at_location(station.x, station.y))}"
+                )
         _trains = list(trains_at_location(station.x, station.y))
         if station.depth == len(_trains):  # station is full
             print(f"{env.now:03d} {station.id[0:4]} | At capacity ({station.depth})")
             for train in _trains:
-                if random.choice([True, False]):
+                # if random.choice([True, False]):
+                # msg(env.now, train, "Opt 1")
+                # env.process(train.move(env, 20, 20))
+                # else:
+                # msg(env.now, train, "Opt 2")
                     env.process(train.move(env, randint(1, 50), randint(1, 50)))
+
+            yield env.timeout(1)
+            _trains = list(trains_at_location(station.x, station.y))
             print(f"{env.now:03d} {station.id[0:4]} | Capacity ({len(_trains)})")
+            empty_slots = station.depth - len(_trains)
+            if empty_slots > 0:
+                for _ in range(empty_slots):
                 if (
                     len(station.no_go) > 0
                 ):  # TODO: now picks up trains that are underway
