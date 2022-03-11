@@ -332,14 +332,13 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "rich"
-version = "11.0.0"
+version = "12.0.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
 python-versions = ">=3.6.2,<4.0.0"
 
 [package.dependencies]
-colorama = ">=0.4.0,<0.5.0"
 commonmark = ">=0.9.0,<0.10.0"
 pygments = ">=2.6.0,<3.0.0"
 typing-extensions = {version = ">=3.7.4,<5.0", markers = "python_version < \"3.8\""}
@@ -371,14 +370,14 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "textual"
-version = "0.1.14"
+version = "0.1.17"
 description = "Text User Interface using Rich"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-rich = ">=11.0.0,<12.0.0"
+rich = ">=12.0.0,<13.0.0"
 typing-extensions = {version = ">=3.10.0,<4.0.0", markers = "python_version < \"3.8\""}
 
 [[package]]
@@ -441,7 +440,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "9ad5a6bd24183abb5105f1a4a19df6e44fe73901601da5b3523b943455275dbb"
+content-hash = "92cbac71360220b8fa965a995e0b9a214399ce5a50c25255b80c70938c65f739"
 
 [metadata.files]
 atomicwrites = [
@@ -606,8 +605,8 @@ requests = [
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
 ]
 rich = [
-    {file = "rich-11.0.0-py3-none-any.whl", hash = "sha256:d7a8086aa1fa7e817e3bba544eee4fd82047ef59036313147759c11475f0dafd"},
-    {file = "rich-11.0.0.tar.gz", hash = "sha256:c32a8340b21c75931f157466fefe81ae10b92c36a5ea34524dff3767238774a4"},
+    {file = "rich-12.0.0-py3-none-any.whl", hash = "sha256:fdcd2f8d416e152bcf35c659987038d1ae5a7bd336e821ca7551858a4c7e38a9"},
+    {file = "rich-12.0.0.tar.gz", hash = "sha256:14bfd0507edc633e021b02c45cbf7ca22e33b513817627b8de3412f047a3e798"},
 ]
 safety = [
     {file = "safety-1.10.3-py2.py3-none-any.whl", hash = "sha256:5f802ad5df5614f9622d8d71fedec2757099705c2356f862847c58c6dfe13e84"},
@@ -618,8 +617,8 @@ simpy = [
     {file = "simpy-4.0.1.tar.gz", hash = "sha256:b36542e2faab612f861c5ef4da17220ac1553f5892b3583c67281dbe4faad404"},
 ]
 textual = [
-    {file = "textual-0.1.14-py3-none-any.whl", hash = "sha256:69ef5db48e76e0853589bfae88a76038f70d37434129cf8869d5a61779654b4c"},
-    {file = "textual-0.1.14.tar.gz", hash = "sha256:1e6eae6f904b6c1210ea6e6d9d1f388ab6b9665117b1c72b9a63660ab71df31f"},
+    {file = "textual-0.1.17-py3-none-any.whl", hash = "sha256:12c3e7d77faa76463e40e4eff58d591143770bb61780ecf0d2dae65e783896cd"},
+    {file = "textual-0.1.17.tar.gz", hash = "sha256:af6aa1fa34fe6d40689ce55a7bf519a07e48523a75b95cbed572990e0d6b6f84"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
